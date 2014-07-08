@@ -1,0 +1,49 @@
+// author: Jonny Quarta
+// Date: March 19st 2014
+
+#include "spin1_api.h"
+#include "spinn_io.h"
+
+#define VAR_LOCATION 0xf500003c
+
+#define EAST 0x1
+
+#define CORE(n) (1<< (n+6))
+
+#define MGMT_BIT 0x400
+#define EVDS1_ENABLE 0x45
+
+
+uint *camera;
+
+/*
+void initIO() {
+	camera = (uint*)VAR_LOCATION;
+
+	spin1_set_mc_table_entry(0x1, 	EVDS1_ENABLE | MGMT_BIT, 0xFFFFFFFF, EAST);
+
+	// camera reception entry
+	spin1_set_mc_table_entry(0x3, 	0x0,	0x0, CORE(1));
+
+	// activating camera
+	spin1_send_mc_packet(EVDS1_ENABLE | MGMT_BIT, 1, 1);
+}*/
+
+
+void cameraEvent(uint key, uint payload){
+	*camera = key;
+}
+
+
+void c_main (void)
+{
+	//initIO();
+
+	// events setting
+	spin1_callback_on(MC_PACKET_RECEIVED,cameraEvent,1);
+	
+
+	spin1_start();
+}
+
+

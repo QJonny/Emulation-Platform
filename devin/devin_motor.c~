@@ -1,0 +1,47 @@
+// author: Jonny Quarta
+// Date: March 19st 2014
+
+#include "spin1_api.h"
+#include "spinn_io.h"
+
+#define VAR_LOCATION 0xf500003c
+#define CHECK_LOCATION 0xf5000038
+
+#define EAST 0x1
+
+#define MOTORS_KEY ((252 << 24) | (255 << 16))
+
+
+uint *motor;
+uint *check;
+
+
+void sendMotor(void){
+	while(1) {
+		spin1_delay_us(10000);
+		if(*check == 1) {
+			spin1_send_mc_packet(MOTORS_KEY, *motor, 1);
+			*check = 0;
+		}
+	}
+}
+
+void initIO(void) {
+	motor = (uint*)VAR_LOCATION;
+	check = (uint*)CHECK_LOCATION;
+	*check = 0;
+
+	// motor entry
+	spin1_set_mc_table_entry(0x2, 	MOTORS_KEY, 0xFFFF0000,	EAST);
+}
+
+
+void c_main (void)
+{
+	initIO();
+
+	sendMotor();
+	spin1_start();
+}
+
+
