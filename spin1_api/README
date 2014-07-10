@@ -1,0 +1,14 @@
+CP Note (9th Oct 2013):
+
+These files should not exist really.
+They should use the spin1_api in the SpiNNaker package, which comes from the SVN repository.
+
+A meld will how you how they differ, but they exist due to the locations of sections of 
+SpiNNaker memory in the PC's memory mapped files, meaning that if you don't have 4GB of 
+real PC memory you can't run the simulations.  This is due to the SpiNNaker positions 
+of SDRAM and SYSRAM - which are in too high a place in the memory map for some machines.
+There is also an extra event type to be considered.
+
+TODO.
+To harmonise this with the spinnaker package spin1_api folder and not have this local version.
+

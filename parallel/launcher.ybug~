@@ -1,0 +1,40 @@
+##
+Sequential ball balancer example using flood fill
+##
+
+### BOOTING ####
+iptag .
+iptag . 17892 1
+### p2pc creates the virtual chips/cores so you must do this before any reads/writes
+### You can also initalise the emulator using the default.cfg file in the emulators root directory
+p2pc 2 2
+
+
+### Example 2: floodfill ###
+
+### floodfill write to ALL chips but only the cores specified by the mask ###
+sp 0 0
+ff BallController fffe
+
+sp 0 1
+ff BallController fffe
+
+sp 1 0
+ff BallController fffe
+
+sp 1 1
+ff BallController fffe
+
+### FF can take a while to load apps as its creating and running an executable file ###
+sleep 3
+
+smemb f5000000
+
+smemw f5000000
+
+sver
+
+
+
+
+

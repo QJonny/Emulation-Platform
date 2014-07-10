@@ -1,0 +1,123 @@
+#include "../include/spin_devin.h"
+#include <string.h>
+#include <arpa/inet.h>
+#include <netinet/in.h>
+#include <stdio.h>
+#include <sys/types.h>
+#include <sys/socket.h>
+#include <unistd.h>
+
+#define WRITE_BUFLEN 34
+#define READ_BUFLEN 26
+#define REC_BUFLEN 18
+
+struct sockaddr_in spinn_addr;
+int spinn_id;
+int connected = 0;
+
+
+int spin_devin_init() {
+	connected = 1;
+
+	if ((spinn_id = socket(AF_INET, SOCK_DGRAM, IPPROTO_UDP)) < 0) {
+		connected = 0;
+	}
+
+
+
+	memset((char *) &spinn_addr, 0, sizeof(spinn_addr));
+
+	spinn_addr.sin_family = AF_INET;
+	spinn_addr.sin_port = htons(SPINNAKER_PORT);
+
+
+
+	if (inet_aton(SPINNAKER_ADDR, &spinn_addr.sin_addr)==0) {
+		connected = 0;
+	}
+
+	return connected;
+}
+
+
+unsigned int spin_devin_get_camera() {
+	if(connected) {
+		char buf[READ_BUFLEN];
+		char rcv_buf[REC_BUFLEN];
+		unsigned int pos = 0;
+
+		memset(buf, 0, READ_BUFLEN * sizeof(char));
+		memset(rcv_buf, 0, REC_BUFLEN * sizeof(char));
+
+
+		buf[2] = 0x87; // reply expected
+		buf[3] = 0xff;
+		buf[5] = 0xff;
+		buf[10] = 0x2; // "read" command
+		buf[18] = 0x4; // length
+		buf[22] = 0x2; // type "word"
+
+		// motor
+		// memory address (little endian)
+		buf[14] = CAMERA_LOCATION & 0x000000ff;
+		buf[15] = (CAMERA_LOCATION >> 8) & 0x000000ff;
+		buf[16] = (CAMERA_LOCATION >> 16) & 0x000000ff;
+		buf[17] = (CAMERA_LOCATION >> 24) & 0x000000ff;
+
+		sendto(spinn_id, buf, READ_BUFLEN, 0, (struct sockaddr *) &spinn_addr, sizeof(spinn_addr));
+
+		// receive
+		recvfrom(spinn_id, rcv_buf, REC_BUFLEN, 0, (struct sockaddr *) &spinn_addr, (socklen_t *)sizeof(spinn_addr));
+
+		pos = (rcv_buf[17] << 24)|(rcv_buf[16] << 16 & 0x00ff0000)|(rcv_buf[15] << 8 & 0x0000ff00)|(rcv_buf[14] & 0x000000ff);
+
+		return pos;
+	}
+
+	return (unsigned int)0;
+}
+
+
+void spin_devin_send_motor(unsigned int command) {
+	if(connected) {
+		char buf[WRITE_BUFLEN];
+		memset(buf, 0, WRITE_BUFLEN * sizeof(char));
+		buf[2] = 0x7; // no reply expected
+		buf[3] = 0xff;
+		buf[5] = 0xff;
+		buf[10] = 0x3; // "write" command
+		buf[18] = 0x8; // length
+		buf[22] = 0x2; // type "word"
+
+		// motor and check together (we use the fact that 
+		// MOTOR_LOCATION and CHECK_LOCATION are contiguous
+		// memory adresses
+
+		// memory address (little endian)
+		buf[14] = MOTOR_LOCATION & 0x000000ff;
+		buf[15] = (MOTOR_LOCATION >> 8) & 0x000000ff;
+		buf[16] = (MOTOR_LOCATION >> 16) & 0x000000ff;
+		buf[17] = (MOTOR_LOCATION >> 24) & 0x000000ff;
+
+		// motor value
+		buf[26] = command & 0x000000ff;
+		buf[27] = (command >> 24) & 0x000000ff;
+		buf[28] = (command >> 24) & 0x000000ff;
+		buf[29] = (command >> 24) & 0x000000ff;
+		// check value
+		buf[30] = 0x1;
+		buf[31] = 0x0;
+		buf[32] = 0x0;
+		buf[33] = 0x0;
+
+		sendto(spinn_id, buf, WRITE_BUFLEN, 0, (struct sockaddr *) &spinn_addr, sizeof(spinn_addr));
+	}
+}
+
+
+void spin_devin_dispose() {
+	if(connected) {
+		close(spinn_id);
+	}
+}
+

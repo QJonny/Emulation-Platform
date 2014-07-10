@@ -1,0 +1,156 @@
+**********************************************************
+                          README
+           spin_emu -- a SpiNNaker API emulator
+
+Changes: 
+
+26/9/2013 - Documentation changed to reflect that the
+            emulator is now part of the spinnaker package.
+
+**********************************************************
+
+Copyright (C) 2012, Thomas Rast <trast@inf.ethz.ch>
+Copyright (C) 2013, Matthew Orlinski <me@shigs.co.uk>
+Copyright (C) 2013, Cameron Patterson <cameron.patterson@manchester.ac.uk>
+
+Licensed as GPLv2, see COPYING.
+
+
+
+--------------------------------------------------
+INTRODUCTION
+--------------------------------------------------
+
+This program/library emulates the SpiNNaker API sufficiently closely
+to let it run on Linux, provided you don't use ARM assembly or
+anything like that.
+
+A (slightly outdated but still very useful) description is in Thomas Rast's paper.
+You can also get more detailed documentation from the wiki page:
+https://spinnaker.cs.man.ac.uk/tiki-index.php?page=emulator
+
+Briefly put, the emulator does the following:
+
+* spawn one POSIX process per SpiNNaker core
+
+* mmap() appropriately-shared memory for each core, to emulate DTCM,
+  SDRAM and SYSRAM's place in the address space.
+
+* provide a dispatcher process that dispatches multicast and SDP packets
+  between the cores, and to/from a UDP socket.
+
+* Responds to SCP packets for write,read,sver,ff,etc. which should
+  allow the emulator to be used remotely (not tested).
+
+--------------------------------------------------
+INSTALLATION
+--------------------------------------------------
+
+If you are unfamilar with this emulator then you should first read the description
+and installation instructions on the SpiNNaker wiki
+https://spinnaker.cs.man.ac.uk/tiki-index.php?page=emulator
+
+There are several ways to test the emulator including non-neural apps, such as
+the heat demo, and the game of life, but it also does neural apps too. 
+Running the emulator with PACMAN and the neural application framework should
+be fine, but please be aware that the emulator's make files are sufficiently
+different to compile the application framework (this is documented on the
+install wiki page
+https://spinnaker.cs.man.ac.uk/tiki-index.php?page=emulator_install),
+and you can find examples in the spinnaker_package/src/app*/build folders.
+
+A full set of instructions can be found on the wiki, but quickly - to test the heat demo:
+
+ * `cd spin_emulator`
+ * Run `./heat-compileAndRun.sh` which should compile and run an emulated 
+   SpiNNaker board with a default configuration (4 chips, simulation in real time).
+
+Then in a different window go into the tools directory and start the demo:
+
+ * `cd spin_package/tools`
+ * `./ybug 127.0.0.1 < ../spin_emulator/demos/heatdemo2.ybug `
+
+If you have any problems check the dependencies for the emulator and visualiser on the
+install page (https://spinnaker.cs.man.ac.uk/tiki-index.php?page=emulator_install).
+
+The installation can be summarised briefly as:
+
+1. Compiling the emulator
+
+	a) cd emu
+	b) make
+
+2. Compiling the visualisation tool
+
+	a) cd spinnaker_package/tools/visualiser
+	b) find the line to make the tool at the head of the visualiser.cpp file
+
+3. Compiling your applications (e.g. heat_demo)
+
+	a) cd demos
+	b) make prog=heat_demo
+	c) note that make clean in this example would be `make clean prog=heat_demo'
+
+4. All in one script examples (compile and run)
+
+	a) run `startEmulator.sh' to simply compile and run the emulator.
+	b) run `heat-compileAndRun.sh' to compile the emulator and heat demo.
+	c) run `life-compileAndRun.sh' to compile the emulator and game of life.
+    d) run `neural-compileAndRun.sh' to compile the emulor and neural application framework.
+           NOTE: the neural-compileAndRun script needs the PACKAGE_ROOT environment variable
+                 in order to know where to locate the emulator's SpiNNaker application framework files.
+
+--------------------------------------------------
+COMPILING NEURAL MODELS AND ADDITIONAL DEMOS
+
+See also the basic tutorial on the wiki:
+https://spinnaker.cs.man.ac.uk/tiki-index.php?page=emulator_newapp
+
+--------------------------------------------------
+
+1. If you want to add new neural models to the emulator take a look at the `spinnaker_package/src/app_frame` directory. This 
+   directory already contains model_izhikevich, model_lif, and model_lif_cond. You can put your new models here.
+
+   N.B. New models needs to be compiled with the `emu/spin_emu_app.o` file and emulator's API to work in the emulator.
+   See the spinnaker_package/src/app_frame/build emulator build file as an exemplar for how to do this. 
+
+2. These emulator specific makefiles also contains commands to move the compiled binary files to the correct spinnaker
+   package directory (because pacman will expect them to be in the folder `PACKAGE_ROOT/binaries`).
+
+3. For simpler simulations such as the heat demo, put your program (foo.c) and support files in the `demos`
+   directory of the emulator. You can compile and link your simulations with the emulator's API by running the command 
+   `make prog=foo` from the `demos` directory.
+
+   N.B. If you get stuck, the file `heat-compileAndRun.sh' shows an example of how to compile and run a simple 
+   simulation like the heat demo.
+
+   N.B.2. While foo will actually be an executable, running it on its own won't work. You need to run the emulator and pass
+   the executable to it using SpiNNaker SDP packets. The easiest way to do this is via ybug as in the heat demo examples.
+
+4. To issue commands to the emulator use ybug or pacman in the same way as on the SpiNNaker hardware.
+   See life.ybug and heatdemo.ybug for examples of using ybug directly, or for pacman install instructions go to
+   https://spinnaker.cs.man.ac.uk/tiki-index.php?page=emulator_install
+
+5. Instructions on how to validate and run the full set of neural and non-neural demos can be found on the wiki.
+
+
+--------------------------------------------------
+BETWEEN SIMULATIONS
+--------------------------------------------------
+If you need to start a new simulation then you MUST restart the emulator.  
+The easy way to do this is to Control+C in the window where you are running the emulator.
+If you can't do this then there is a script in the emulator directory to kill things for you.
+
+
+--------------------------------------------------
+DEBUGGING EXAMPLES
+--------------------------------------------------
+
+* gdb: usually you will only want to debug a single process.  The
+  startup code puts the chip and core IDs in argv[0], so you can use
+  ps to find out what to attach to.
+
+* valgrind: try
+
+    valgrind --trace-children=yes ./spin_emu
+

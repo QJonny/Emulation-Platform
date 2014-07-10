@@ -1,0 +1,52 @@
+************************************
+
+spin_emu -- a SpiNNaker API emulator
+simulation (demos) directory
+
+************************************
+
+Copyright (C) 2012, Thomas Rast <trast@inf.ethz.ch>
+Copyright (C) 2013, Matthew Orlinski <me@shigs.co.uk>
+
+Licensed as GPLv2, see COPYING.
+
+
+
+--------------------------------------------------
+INTRODUCTION
+--------------------------------------------------
+
+Put your new simulations in this directory, and you can use its Makefile to target the emulator
+
+
+--------------------------------------------------
+Adding non-neural simulations e.g. heat demo
+--------------------------------------------------
+
+This directory can be used for simple standalone applications, like the heat demo. 
+The make file provided allows you to just copy your code into this directory 
+(e.g. foo.c) and run `make prog=foo`.
+For a script that builds and runs everything from a single command,  take a look at the 
+emulator/heat-compileAndRun.sh example.
+
+
+--------------------------------------------------
+Adding new neural models and simulations
+--------------------------------------------------
+
+The neural models are part of the spinnaker_package.
+app_frame, app_monitoring/dump, and app_spike should be familiar to those that have used the SpiNNaker package before.
+For example, app_frame is where neural models should go (e.g. model_lif.c).
+
+If you are developing PyNN simulations then you should do this in the spinnaker_package directory, where
+you can place your sources in the examples folder and have them work in the same way as the
+other regression tests provided there. 
+
+If you want to develop new neural models, put them in spinnaker_package/src/app_frame/src|inc and update
+the emulator specific make files as necessary in spinnaker_package/src/app_frame/build.
+See the emulator/neural-compileAndRun.sh for something that scripts the compliation and execution all together. 
+The reason that specific emulation files are required is that you need to include spin_emu_app.c which 
+contains the main method for the emulator, and the emulator's SpiNNaker API.
+
+
+

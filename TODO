@@ -1,0 +1,58 @@
+************************************
+
+spin_emu -- a SpiNNaker API emulator
+
+************************************
+
+TODO
+----
+
+* Complete the API.  Right now, the following are not or only partly
+  supported:
+
+    uchar spin1_get_leds(void);
+    void spin1_set_leds(uchar leds);
+    [unimplemented; need a good way to display them alongside debug output]
+
+    uint spin1_schedule_callback(callback_t cback, uint arg0, uint arg1, uint priority);
+    [currently abuses the user event because it makes the event dispatch simpler]
+
+    void spin1_flush_rx_packet_queue(void);
+    void spin1_flush_tx_packet_queue(void);
+    [unimplemented; don't really make sense]
+
+    all of the io_*() family except io_printf()
+    [then again printf is all you need]
+
+* Fix it so an AS command will look inside the ELF headers to extract the length of the exectuable 
+  which has been placed in memory.
+  Currently the emulator will read far too much memory when building executable files.
+
+* Support the quit command, or some way to restart the emulator cleanly.
+
+* Make it a linkable library (you'll still have to set the text
+  segment correctly, though)
+
+* Implement a smart way to get at the MC packets in Wireshark
+
+* Only params you can give to the emulator are x y (number of chips). Use getopt or similar to parse additional options for
+  - various debugging outputs
+  - setting the speed of the emulator, i.e. SLOW_DOWN_TIMER in spin_emu.h
+  - loading a provided set of memory files instead of blank/temp ones. 
+
+* When the race condition in various c_main functions has been resolved, the application code bundled
+  with the emulator will need to be replaced. 
+
+* The application code should be removed from the emulator bundle completely, but this will require 
+  an additon to the SpiNNaker Package framework and make files.
+
+* The  SV struct in SYSRAM is not initialized in the emulator, neither is the P2P routing table. Will this be needed in the future?
+
+* To support priorities properly for tasks (at present there is a single priority per event type).
+
+* To remove the local copy of the spin1_api and replace with the version got from the SpiNNaker package (linked from SVN source).
+
+
+
+
+
