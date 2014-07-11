@@ -1,1 +1,9 @@
 \contentsline {section}{\numberline {1}Introduction}{1}
+\contentsline {section}{\numberline {2}Architecture}{2}
+\contentsline {section}{\numberline {3}Communication Protocol}{2}
+\contentsline {section}{\numberline {4}Emulator-side Implementation}{3}
+\contentsline {subsection}{\numberline {4.1}Initialization}{4}
+\contentsline {subsection}{\numberline {4.2}Camera Input}{5}
+\contentsline {subsection}{\numberline {4.3}Motor Output}{6}
+\contentsline {section}{\numberline {5}SpiNNaker-side Implementation}{7}
+\contentsline {section}{\numberline {6}Conclusion}{8}
