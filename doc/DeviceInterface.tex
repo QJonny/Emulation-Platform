@@ -1,0 +1,66 @@
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% EPFL/Blue Brain Project
+%
+% Author:
+% 	Quarta Jonny
+%
+% Date:
+%	June 2014
+%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+%----------------------------------------------------------------------------------------
+%	PACKAGES AND DOCUMENT CONFIGURATIONS
+%----------------------------------------------------------------------------------------
+
+\documentclass{article}
+
+
+\usepackage{graphicx} % Required for the inclusion of images
+\usepackage{multicol}
+\usepackage[affil-it]{authblk}
+
+
+\setlength\parindent{0pt} % Removes all indentation from paragraphs
+
+\renewcommand{\labelenumi}{\alph{enumi}.} % Make numbering in the enumerate environment by letter rather than number (e.g. section 6)
+
+
+%----------------------------------------------------------------------------------------
+%	DOCUMENT INFORMATION
+%----------------------------------------------------------------------------------------
+
+\title{\textbf{Device Interface for motor/camera communication}} % Title
+
+\author{Jonny \textsc{Quarta}} % Author name
+
+\date{\today} % Date for the report
+\affil{Ecole Polytechnique Federale de Lausanne}
+
+\begin{document}
+
+\maketitle % Insert the title, author and date
+
+\tableofcontents
+
+\section{Introduction}
+The SpiNNaker is a very powerful device because it enables the user to run parallel simulations in a very efficient way. As already stated in other documents, it suffers however from various drawbacks, especially from the developer perspective. Indeed, when programming the device, the developer has very few debugging tools, the only one being the \textit{io\_printf} function, whose utilization is not advised because it alters the program behaviour. \\ \\
+
+For these reasons an emulator has been created. The emulator also enables someone who does not have the SpiNNaker to program on it anyway.\\
+In order to speed up the development time, one should first implement his program on the emulator, with the possibility of using all the available debugigng tools, and then port the code to the actual device.\\ \\
+
+However, the emulator has some limitations, one of these being the fact that external devices (like motors or cameras) cannot be accessed. This is why a new emulator component has been designed.\\
+\textbf{devin} (for DEVice INterface) is the component enabling the user to access the camera and the motors.\\
+This document explores the way it has been constructed.
+
+\section{Architecture}
+Normally, there is no possibility to directly link the motors and the camera to a pc, even with the USB port. Or if there is, one needs to develop all the drivers to communicate with. \\
+The proposed architecture takes advantage of the already existing links between the SpiNNaker and the peripherals.\\
+
+The idea is to load a simple program into the SpiNNaker, whose purpose is to activate the motors and receive the camera input, as could do any normal loaded program. Finally, the pc emulator would communicate with the program on the SpiNNaker rather than directly with the peripherals. \\
+This is achievable because the SpiNNaker provides a way to access the loaded program data.
+
+\section{Communication Protocol}
+In order to perform any operation from the pc to the SpiNNaker, UDP messages must be exchanged between the two devices. The Ethernet port of the SpiNNaker is actually always listening for incoming UDP packets. These packets contain SDP data (see the SpiNNaker official documentation for more details). Inside an SDP packet, SCP command can be declared. These commands provide very low level operations, like reading or writing data at a particular memory address, or start executing from a certain location. Again, for more information, please consult the SpiNNaker documentation about SCP.
+
+\end{document}
