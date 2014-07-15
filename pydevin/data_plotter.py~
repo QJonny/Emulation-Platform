@@ -1,0 +1,47 @@
+import pygame
+import sys
+import time
+import cameraManager
+        
+
+def draw(x, y):
+        global window
+        pygame.draw.circle(window, (255, 255, 255), (x, y), 1, 1)
+
+
+def run():
+        global window
+	counter = 1
+	x_pos = 0
+	y_pos = 0
+        start_time = int(time.time())
+
+        #create the screen
+        window = pygame.display.set_mode((128, 128)) 
+
+        #input handling (somewhat boilerplate code):
+        while True: 
+
+           
+           for d in data:
+                if(1 == int(time.time()) - start_time):
+			(x_pos, y_pos) = cameraManager.getCamera()
+        		window.fill((0,0,0))
+			
+                        #draw a circle
+                        draw(x_pos, y_pos)
+		else:
+			cameraManager.cameraEvent(counter)
+
+		counter = counter + 1
+
+           #draw it to the screen
+           pygame.display.update() 
+
+           for event in pygame.event.get(): 
+              if event.type == pygame.QUIT: 
+                  pygame.quit()
+                  sys.exit(0) 
+
+
+run()
