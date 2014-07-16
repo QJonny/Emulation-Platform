@@ -24,7 +24,6 @@ y_buffer = [ 0 for i in range(16) ]
 total_sum_x = 0
 total_sum_y = 0
 curr_index = 0
-old_time = -1
 # end of ball tracking
 
 
@@ -77,8 +76,8 @@ def normalize_ball_params():
 
 
 
-def compute_pos(x_cur, y_cur, sim_time):
-	global pos_computed, x_pos, y_pos, curr_index, total_sum_x, total_sum_y, x_buffer, y_buffer, old_time
+def compute_pos(x_cur, y_cur):
+	global pos_computed, x_pos, y_pos, curr_index, total_sum_x, total_sum_y, x_buffer, y_buffer
 
 	if(pos_computed == 0 or norm(x_pos - x_cur, y_pos - y_cur) < 100):
 
@@ -101,10 +100,9 @@ def compute_pos(x_cur, y_cur, sim_time):
 
 		curr_index = (curr_index + 1) % 16
 
-		old_time = sim_time
 
 
-def cameraEvent(sim_time):
+def cameraEvent():
 	global pdev
 
 	key = pdev.get_camera()
@@ -116,7 +114,7 @@ def cameraEvent(sim_time):
 	check = (key >> 15) & 0x01
 
 	if(pol == 1):
-		compute_pos(x_cur, y_cur, sim_time)
+		compute_pos(x_cur, y_cur)
 		normalize_ball_params()
 
 

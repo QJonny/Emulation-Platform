@@ -77,8 +77,8 @@ def normalize_ball_params():
 
 
 
-def compute_pos(x_cur, y_cur, sim_time):
-	global pos_computed, x_pos, y_pos, curr_index, total_sum_x, total_sum_y, x_buffer, y_buffer, old_time
+def compute_pos(x_cur, y_cur):
+	global pos_computed, x_pos, y_pos, curr_index, total_sum_x, total_sum_y, x_buffer, y_buffer
 
 	if(pos_computed == 0 or norm(x_pos - x_cur, y_pos - y_cur) < 100):
 
@@ -101,10 +101,9 @@ def compute_pos(x_cur, y_cur, sim_time):
 
 		curr_index = (curr_index + 1) % 16
 
-		old_time = sim_time
 
 
-def cameraEvent(sim_time):
+def cameraEvent():
 	global pdev
 
 	key = pdev.get_camera()
@@ -116,7 +115,7 @@ def cameraEvent(sim_time):
 	check = (key >> 15) & 0x01
 
 	if(pol == 1):
-		compute_pos(x_cur, y_cur, sim_time)
+		compute_pos(x_cur, y_cur)
 		normalize_ball_params()
 
 
@@ -132,7 +131,7 @@ def setMotorRange(l, h):
 	global alpha_x, beta_x, alpha_y, beta_y
 
 	alpha_x = 1000.0 / (h - l)
-	beta_x = 1650.0 - 1000.0*(l/(h-l))
+	beta_x = 1680.0 - 1000.0*(l/(h-l))
 
 	alpha_y = 1000.0 / (h - l)
 	beta_y = 1450.0 - 1000.0*(l/(h-l))

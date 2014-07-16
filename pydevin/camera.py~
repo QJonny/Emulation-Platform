@@ -2,30 +2,52 @@ import pygame
 import sys
 import time
 import devinManager
+import math
+from speedManager import *
         
 
-def draw(x, y):
+def normalize(x, y):
+	norm = math.sqrt(x*x + y*y)
+	if(norm > 0):
+		return (0.5*x/norm, 0.5*y/norm)
+	else:
+		return (0.0, 0.0)
+
+
+def drawCircle(x, y):
         global window
         pygame.draw.circle(window, (255, 255, 255), (x, y), 1, 1)
+
+def drawLine(x, y):
+        global window
+        pygame.draw.line(window, (255, 0, 0), (64, 64), (x, y), 1)
 
 
 def run():
         global window
 	counter = 1
-	x_pos = 0
-	y_pos = 0
+	v = SpeedCalculator()
+	vsm = Smoother(128)
 
         #create the screen
         window = pygame.display.set_mode((128, 128)) 
 
         #input handling (somewhat boilerplate code):
         while True: 
-	    devinManager.cameraEvent(counter)
+	    devinManager.cameraEvent()
 	    (x_pos, y_pos) = devinManager.getCamera()
+
+            (v_x, v_y) = v.getSpeed(x_pos, y_pos)
+            (n_v_x, n_v_y) = normalize(v_x, v_y)
+
+            vsm.addVector(n_v_x, n_v_y)
+            (n_v_x, n_v_y) = vsm.getVector()
+
 	    window.fill((0,0,0))
 	
-	    #draw a circle
-	    draw(int(64*x_pos + 64), 128 - int(64*y_pos + 64))
+	    #draw
+	    drawLine(int(64*n_v_x + 64), 128 - int(64*n_v_y + 64))
+	    drawCircle(int(64*x_pos + 64), 128 - int(64*y_pos + 64))
 
 	    counter = counter + 1
 
@@ -38,4 +60,3 @@ def run():
                     sys.exit(0) 
 
 
-run()
